@@ -403,8 +403,14 @@ https://docs.zephyrproject.org/latest/guides/kconfig/tips.html#menuconfig-symbol
         Checks that there are no references to undefined Kconfig symbols within
         the Kconfig files
         """
-        undef_ref_warnings = "\n\n\n".join(warning for warning in kconf.warnings
-                                           if "undefined symbol" in warning)
+        undef_warnings = []
+        for warning in kconf.warnings:
+            if "undefined symbol" in warning:
+                sym = re.search(r"undefined symbol ([^:]*)", warning).group(1)
+                if sym not in UNDEF_KCONFIG_WHITELIST:
+                    undef_warnings.append(warning)
+
+        undef_ref_warnings = "\n\n\n".join(undef_warnings)
 
         if undef_ref_warnings:
             self.add_failure("Undefined Kconfig symbols:\n\n"
@@ -544,6 +550,7 @@ UNDEF_KCONFIG_WHITELIST = {
     "MYFEATURE",
     "MY_DRIVER_0",
     "NORMAL_SLEEP",  # #defined by RV32M1 in ext/
+    "OPENOCD_SUPPORT",
     "OPT",
     "OPT_0",
     "PEDO_THS_MIN",
