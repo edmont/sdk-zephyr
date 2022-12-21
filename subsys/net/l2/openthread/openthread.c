@@ -400,18 +400,24 @@ int openthread_start(struct openthread_context *ot_context)
 
 	otIp6SetEnabled(ot_context->instance, true);
 
+#if defined(CONFIG_OPENTHREAD_MTD_SED) || defined(CONFIG_OPENTHREAD_MTD_SSED)
 	/* Sleepy End Device specific configuration. */
-	if (IS_ENABLED(CONFIG_OPENTHREAD_MTD_SED)) {
-		otLinkModeConfig ot_mode = otThreadGetLinkMode(ot_instance);
+	otLinkModeConfig ot_mode = otThreadGetLinkMode(ot_instance);
 
-		/* A SED should always attach the network as a SED to indicate
-		 * increased buffer requirement to a parent.
-		 */
-		ot_mode.mRxOnWhenIdle = false;
+	/* A SED should always attach the network as a SED to indicate
+	 * increased buffer requirement to a parent.
+	 */
+	ot_mode.mRxOnWhenIdle = false;
 
-		otThreadSetLinkMode(ot_context->instance, ot_mode);
-		otLinkSetPollPeriod(ot_context->instance, OT_POLL_PERIOD);
-	}
+	otThreadSetLinkMode(ot_context->instance, ot_mode);
+
+#if defined(CONFIG_OPENTHREAD_MTD_SED)
+	otLinkSetPollPeriod(ot_context->instance, OT_POLL_PERIOD);
+#endif
+#if defined(CONFIG_OPENTHREAD_MTD_SSED)
+	otLinkCslSetPeriod(ot_context->instance, CONFIG_OPENTHREAD_CSL_PERIOD * 1000 / 160);
+#endif
+#endif /* defined(CONFIG_OPENTHREAD_MTD_SED) || defined(CONFIG_OPENTHREAD_MTD_SSED) */
 
 	if (otDatasetIsCommissioned(ot_instance)) {
 		/* OpenThread already has dataset stored - skip the

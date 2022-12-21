@@ -59,6 +59,15 @@ config OPENTHREAD_POLL_PERIOD
 	default 236000
 	depends on OPENTHREAD_MTD_SED
 
+config OPENTHREAD_MTD_SSED
+	bool "SSED - Synchronized Sleepy End Device (CSL Receiver)"
+	depends on OPENTHREAD_MTD
+	depends on OPENTHREAD_CSL_RECEIVER
+
+config OPENTHREAD_CSL_PERIOD
+	int "CSL period for synchronized sleepy end devices [ms]"
+	default 500
+
 config OPENTHREAD_MAX_CHILDREN
 	int "The maximum number of children"
 	range 1 511
