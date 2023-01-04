@@ -699,25 +699,25 @@ static int nrf5_start(const struct device *dev)
 
 static int nrf5_stop(const struct device *dev)
 {
-#if defined(CONFIG_IEEE802154_CSL_ENDPOINT)
-	if (nrf_802154_sleep_if_idle() != NRF_802154_SLEEP_ERROR_NONE) {
-		if (nrf5_data.event_handler) {
-			nrf5_data.event_handler(dev, IEEE802154_EVENT_SLEEP, NULL);
-		} else {
-			LOG_WRN("Transition to radio sleep cannot be handled.");
-		}
-		return 0;
-	}
-#else
-	ARG_UNUSED(dev);
+// #if defined(CONFIG_IEEE802154_CSL_ENDPOINT)
+// 	if (nrf_802154_sleep_if_idle() != NRF_802154_SLEEP_ERROR_NONE) {
+// 		if (nrf5_data.event_handler) {
+// 			nrf5_data.event_handler(dev, IEEE802154_EVENT_SLEEP, NULL);
+// 		} else {
+// 			LOG_WRN("Transition to radio sleep cannot be handled.");
+// 		}
+// 		return 0;
+// 	}
+// #else
+// 	ARG_UNUSED(dev);
 
-	if (!nrf_802154_sleep()) {
-		LOG_ERR("Error while stopping radio");
-		return -EIO;
-	}
-#endif
+// 	if (!nrf_802154_sleep()) {
+// 		LOG_ERR("Error while stopping radio");
+// 		return -EIO;
+// 	}
+// #endif
 
-	LOG_DBG("nRF5 802154 radio stopped");
+// 	LOG_DBG("nRF5 802154 radio stopped");
 
 	return 0;
 }
