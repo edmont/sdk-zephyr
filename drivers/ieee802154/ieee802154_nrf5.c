@@ -686,6 +686,10 @@ static int nrf5_start(const struct device *dev)
 {
 	ARG_UNUSED(dev);
 
+	// nrf_802154_receive_at_cancel(DRX_SLOT_RX);
+	// LOG_INF("nrf_802154_receive_at_cancel - start");
+	LOG_INF("nrf_802154_receive");
+
 	if (!nrf_802154_receive()) {
 		LOG_ERR("Failed to enter receive state");
 		return -EIO;
@@ -699,25 +703,25 @@ static int nrf5_start(const struct device *dev)
 
 static int nrf5_stop(const struct device *dev)
 {
-// #if defined(CONFIG_IEEE802154_CSL_ENDPOINT)
-// 	if (nrf_802154_sleep_if_idle() != NRF_802154_SLEEP_ERROR_NONE) {
-// 		if (nrf5_data.event_handler) {
-// 			nrf5_data.event_handler(dev, IEEE802154_EVENT_SLEEP, NULL);
-// 		} else {
-// 			LOG_WRN("Transition to radio sleep cannot be handled.");
-// 		}
-// 		return 0;
-// 	}
-// #else
-// 	ARG_UNUSED(dev);
+#if defined(CONFIG_IEEE802154_CSL_ENDPOINT)
+	if (nrf_802154_sleep_if_idle() != NRF_802154_SLEEP_ERROR_NONE) {
+		if (nrf5_data.event_handler) {
+			nrf5_data.event_handler(dev, IEEE802154_EVENT_SLEEP, NULL);
+		} else {
+			LOG_WRN("Transition to radio sleep cannot be handled.");
+		}
+		return 0;
+	}
+#else
+	ARG_UNUSED(dev);
 
-// 	if (!nrf_802154_sleep()) {
-// 		LOG_ERR("Error while stopping radio");
-// 		return -EIO;
-// 	}
-// #endif
+	if (!nrf_802154_sleep()) {
+		LOG_ERR("Error while stopping radio");
+		return -EIO;
+	}
+#endif
 
-// 	LOG_DBG("nRF5 802154 radio stopped");
+	LOG_DBG("nRF5 802154 radio stopped");
 
 	return 0;
 }
@@ -830,6 +834,7 @@ static void nrf5_receive_at(uint32_t start, uint32_t duration, uint8_t channel, 
 	uint64_t rx_time = target_time_convert_to_64_bits(start);
 
 	nrf_802154_receive_at(rx_time, duration, channel, id);
+	LOG_INF("nrf_802154_receive_at %lu %u %u %u", rx_time, duration, channel, id);
 }
 
 static void nrf5_config_csl_period(uint16_t period)
