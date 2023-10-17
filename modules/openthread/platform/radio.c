@@ -87,7 +87,8 @@ static struct ieee802154_radio_api *radio_api;
 
 /* Get the default tx output power from Kconfig */
 static int8_t tx_power = CONFIG_OPENTHREAD_DEFAULT_TX_POWER;
-static uint16_t channel;
+static uint8_t channel;
+static uint8_t last_set_channel;
 static bool promiscuous;
 
 static uint16_t energy_detection_time;
@@ -362,6 +363,15 @@ void platformRadioInit(void)
 	radio_api->configure(radio_dev, IEEE802154_CONFIG_EVENT_HANDLER, &cfg);
 }
 
+void set_radio_channel(uint8_t new_channel)
+{
+	if (new_channel != last_set_channel)
+	{
+		radio_api->set_channel(radio_dev, channel);
+		last_set_channel = new_channel;
+	}
+}
+
 void transmit_message(struct k_work *tx_job)
 {
 	int tx_err;
@@ -379,7 +389,7 @@ void transmit_message(struct k_work *tx_job)
 
 	channel = sTransmitFrame.mChannel;
 
-	radio_api->set_channel(radio_dev, sTransmitFrame.mChannel);
+	set_radio_channel(sTransmitFrame.mChannel);
 
 #if defined(CONFIG_IEEE802154_SELECTIVE_TXPOWER)
 	net_pkt_set_ieee802154_txpwr(tx_pkt, get_transmit_power_for_channel(channel));
@@ -624,8 +634,7 @@ void platformRadioProcess(otInstance *aInstance)
 	/* handle events that can't run during transmission */
 	if (sState != OT_RADIO_STATE_TRANSMIT) {
 		if (is_pending_event_set(PENDING_EVENT_DETECT_ENERGY)) {
-			radio_api->set_channel(radio_dev,
-					       energy_detection_channel);
+			set_radio_channel(energy_detection_channel);
 
 			if (!radio_api->ed_scan(radio_dev,
 						energy_detection_time,
@@ -728,7 +737,7 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
 
 	channel = aChannel;
 
-	radio_api->set_channel(radio_dev, aChannel);
+	set_radio_channel(aChannel);
 	radio_api->set_txpower(radio_dev, get_transmit_power_for_channel(channel));
 	radio_api->start(radio_dev);
 	sState = OT_RADIO_STATE_RECEIVE;
@@ -943,7 +952,7 @@ otError otPlatRadioEnergyScan(otInstance *aInstance, uint8_t aScanChannel,
 	reset_pending_event(PENDING_EVENT_DETECT_ENERGY);
 	reset_pending_event(PENDING_EVENT_DETECT_ENERGY_DONE);
 
-	radio_api->set_channel(radio_dev, aScanChannel);
+	set_radio_channel(aScanChannel);
 
 	if (radio_api->ed_scan(radio_dev, energy_detection_time, energy_detected) != 0) {
 		/*
