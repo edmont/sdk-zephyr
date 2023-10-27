@@ -931,7 +931,17 @@ static int nrf5_configure(const struct device *dev,
 
 #if defined(CONFIG_IEEE802154_CSL_ENDPOINT)
 	case IEEE802154_CONFIG_CSL_RX_TIME: {
-		nrf_802154_csl_writer_anchor_time_set(config->csl_rx_time / NSEC_PER_USEC);
+#if defined(CONFIG_NRF_802154_SER_HOST)
+		net_time_t period_ns = nrf5_data.last_csl_period * 160000;
+		bool changed = (config->csl_rx_time - nrf5_data.last_csl_rx_time) % period_ns;
+		nrf5_data.last_csl_rx_time = config->csl_rx_time;
+
+		if (changed)
+#endif
+
+		{
+			nrf_802154_csl_writer_anchor_time_set(config->csl_rx_time / NSEC_PER_USEC);
+		}
 	} break;
 
 	case IEEE802154_CONFIG_RX_SLOT: {
@@ -949,6 +959,9 @@ static int nrf5_configure(const struct device *dev,
 
 	case IEEE802154_CONFIG_CSL_PERIOD:
 		nrf_802154_csl_writer_period_set(config->csl_period);
+#if defined(CONFIG_NRF_802154_SER_HOST)
+		nrf5_data.last_csl_period = config->csl_period;
+#endif
 		break;
 #endif /* CONFIG_IEEE802154_CSL_ENDPOINT */
 
