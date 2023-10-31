@@ -174,13 +174,16 @@ enum ieee802154_hw_caps {
 	/** TX security supported (key management, encryption and authentication) */
 	IEEE802154_HW_TX_SEC = BIT(13),
 
+	/** RxOnWhenIdle handling supported */
+	IEEE802154_RX_ON_WHEN_IDLE = BIT(14),
+
 	/* Note: Update also IEEE802154_HW_CAPS_BITS_COMMON_COUNT when changing
 	 * the ieee802154_hw_caps type.
 	 */
 };
 
 /** @brief Number of bits used by ieee802154_hw_caps type. */
-#define IEEE802154_HW_CAPS_BITS_COMMON_COUNT (14)
+#define IEEE802154_HW_CAPS_BITS_COMMON_COUNT (15)
 
 /** @brief This and higher values are specific to the protocol- or driver-specific extensions. */
 #define IEEE802154_HW_CAPS_BITS_PRIV_START IEEE802154_HW_CAPS_BITS_COMMON_COUNT
@@ -374,6 +377,9 @@ enum ieee802154_config_type {
 	 */
 	IEEE802154_CONFIG_ENH_ACK_HEADER_IE,
 
+	/** Enable/disable RxOnWhenIdle mode. */
+	IEEE802154_CONFIG_RX_ON_WHEN_IDLE,
+
 	/** Number of types defined in ieee802154_config_type. */
 	IEEE802154_CONFIG_COMMON_COUNT,
 
@@ -403,6 +409,9 @@ struct ieee802154_config {
 
 		/** ``IEEE802154_CONFIG_PROMISCUOUS`` */
 		bool promiscuous;
+
+		/** ``IEEE802154_CONFIG_RX_ON_WHNE_IDLE`` */
+		bool rx_on_when_idle;
 
 		/** ``IEEE802154_CONFIG_EVENT_HANDLER`` */
 		ieee802154_event_cb_t event_handler;
