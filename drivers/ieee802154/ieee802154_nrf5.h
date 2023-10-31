@@ -92,6 +92,17 @@ struct nrf5_802154_data {
 	/* The maximum number of extra CCA attempts to be performed before transmission. */
 	uint8_t max_extra_cca_attempts;
 #endif
+
+#if defined(CONFIG_IEEE802154_CSL_ENDPOINT) && defined(CONFIG_NRF_802154_SER_HOST)
+	/* The last configured value of CSL period in units of 10 symbols. */
+	uint32_t last_csl_period;
+
+	/* The last configured value of CSL phase time in ns. */
+	net_time_t last_csl_rx_time;
+#endif
+
+	/* The TX power in dBm. */
+	int8_t txpwr;
 };
 
 #endif /* ZEPHYR_DRIVERS_IEEE802154_IEEE802154_NRF5_H_ */
