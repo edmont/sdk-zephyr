@@ -585,7 +585,7 @@ def process_meta(zephyr_base, west_projs, modules, extra_modules=None,
             manifest_project, manifest_dirty = _create_meta_project(
                 projects[0].posixpath)
             manifest_off = manifest_project.get("remote") is None
-            if manifest_off:
+            if manifest_off and manifest_project["revision"] is not None:
                 manifest_project["revision"] +=  "-off"
 
         if manifest_project:
